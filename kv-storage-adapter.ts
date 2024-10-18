@@ -2,7 +2,7 @@ import {
     Chunk,
     StorageAdapterInterface,
     type StorageKey
-} from 'npm:@automerge/automerge-repo'
+} from 'npm:@automerge/automerge-repo@1.2.1'
 
 type Data = Uint8Array
 
