@@ -11,8 +11,6 @@ interface StorageAdapterInterface {
     remove(key: StorageKey): Promise<void>
     loadRange(keyPrefix: StorageKey): Promise<Chunk[]>
     removeRange(keyPrefix: StorageKey): Promise<void>
-    //added for ease of testing
-    clearAll(): Promise<void>
 }
 
 const PAYLOAD_A = () => new Uint8Array([0, 1, 127, 99, 154, 235])
@@ -21,9 +19,14 @@ const PAYLOAD_C = () => new Uint8Array([2, 111, 74, 131, 236, 96, 142, 193])
 
 const LARGE_PAYLOAD = new Uint8Array(100000).map(() => Math.random() * 256)
 
-export function testAll(adapter: StorageAdapterInterface) {
+type CleanupFunction = () => Promise<void>
+
+export function testAll(
+    adapter: StorageAdapterInterface,
+    cleanup: CleanupFunction
+) {
     Deno.test(`Storage adapter acceptance tests`, async t => {
-        await adapter.clearAll()
+        await cleanup()
 
         await t.step('load', async t => {
             await t.step(
@@ -83,7 +86,7 @@ export function testAll(adapter: StorageAdapterInterface) {
         })
 
         await t.step('loadRange', async t => {
-            await adapter.clearAll()
+            await cleanup()
             await t.step(
                 'should return an empty array if there is no data',
                 async () => {
@@ -151,7 +154,7 @@ export function testAll(adapter: StorageAdapterInterface) {
             await t.step(
                 'should only load values that match they key',
                 async t => {
-                    await adapter.clearAll()
+                    await cleanup()
                     await adapter.save(
                         ['AAAAA', 'sync-state', 'xxxxx'],
                         PAYLOAD_A()
@@ -181,7 +184,7 @@ export function testAll(adapter: StorageAdapterInterface) {
 
         await t.step('save and remove', async t => {
             await t.step('after removing, should be empty', async t => {
-                await adapter.clearAll()
+                await cleanup()
                 await adapter.save(['AAAAA', 'snapshot', 'xxxxx'], PAYLOAD_A())
                 await adapter.remove(['AAAAA', 'snapshot', 'xxxxx'])
 

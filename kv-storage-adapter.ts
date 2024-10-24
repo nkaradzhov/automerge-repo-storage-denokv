@@ -1,7 +1,7 @@
-import {
+import type {
     Chunk,
     StorageAdapterInterface,
-    type StorageKey
+    StorageKey
 } from 'npm:@automerge/automerge-repo@1.2.1'
 
 type Data = Uint8Array
@@ -46,14 +46,5 @@ export class DenoKVStorageAdapter implements StorageAdapterInterface {
         for await (const entry of list) {
             this.kv.delete(entry.key)
         }
-    }
-
-    async clearAll() {
-        const list = this.kv.list({ prefix: [] })
-        const promises = []
-        for await (const entry of list) {
-            promises.push(this.kv.delete(entry.key))
-        }
-        await Promise.all(promises)
     }
 }
