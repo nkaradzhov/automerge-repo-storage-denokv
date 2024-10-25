@@ -17,7 +17,7 @@ const PAYLOAD_A = () => new Uint8Array([0, 1, 127, 99, 154, 235])
 const PAYLOAD_B = () => new Uint8Array([1, 76, 160, 53, 57, 10, 230])
 const PAYLOAD_C = () => new Uint8Array([2, 111, 74, 131, 236, 96, 142, 193])
 
-const LARGE_PAYLOAD = new Uint8Array(100000).map(() => Math.random() * 256)
+const LARGE_PAYLOAD = new Uint8Array(100_000).map(() => Math.random() * 256)
 
 type CleanupFunction = () => Promise<void>
 
@@ -62,27 +62,25 @@ export function testAll(
                 assertEquals(actual, PAYLOAD_A())
             })
 
-            // TypeError: Value too large (max 65536 bytes)
-            // Values have a maximum length of 64 KiB after serialization.
-            // https://docs.deno.com/api/deno/~/Deno.Kv
-            // await t.step('should work with a large payload', async t => {
-            //     try {
-            //         await adapter.save(
-            //             ['AAAAA', 'sync-state', 'xxxxx'],
-            //             LARGE_PAYLOAD
-            //         )
-            //     } catch (e) {
-            //         console.log(e)
-            //     }
+            await t.step('should work with a large payload', async t => {
+                await cleanup()
+                try {
+                    await adapter.save(
+                        ['AAAAA', 'sync-state', 'xxxxx'],
+                        LARGE_PAYLOAD
+                    )
+                } catch (e) {
+                    assertEquals(true, false, e as string)
+                }
 
-            //     const actual = await adapter.load([
-            //         'AAAAA',
-            //         'sync-state',
-            //         'xxxxx'
-            //     ])
+                const actual = await adapter.load([
+                    'AAAAA',
+                    'sync-state',
+                    'xxxxx'
+                ])
 
-            //     assertEquals(actual, LARGE_PAYLOAD)
-            // })
+                assertEquals(actual, LARGE_PAYLOAD)
+            })
         })
 
         await t.step('loadRange', async t => {
