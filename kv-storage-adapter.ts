@@ -15,14 +15,15 @@ export class DenoKVStorageAdapter implements StorageAdapterInterface {
 
     async load(key: StorageKey): Promise<Data | undefined> {
         const entry = await this.kv.get<Data>(key)
+
         if (entry.value) return entry.value
 
         const list = this.kv.list<Data>({
             prefix: key
         })
-        let returnData: number[] = []
+        const returnData: number[] = []
         for await (const entry of list) {
-            returnData = returnData.concat(Array.from(entry.value))
+            returnData.push(...entry.value)
         }
 
         if (returnData.length === 0) return undefined
